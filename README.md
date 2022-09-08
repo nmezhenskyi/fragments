@@ -2,6 +2,11 @@
 
 Project for Cloud Computing for Programmers (DPS955) course.
 
+## Author
+
+Nikita Mezhenskyi (#164300188)
+nmezhenskyi@myseneca.ca
+
 ## Commands
 
 - `npm start` - starts server
