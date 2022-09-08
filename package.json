@@ -15,5 +15,10 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "eslint": "^8.23.0"
+  },
+  "dependencies": {
+    "pino": "^8.5.0",
+    "pino-http": "^8.2.0",
+    "pino-pretty": "^9.1.0"
   }
 }
