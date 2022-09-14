@@ -1,6 +1,7 @@
 # DPS955 Course Project
 
-Project for Cloud Computing for Programmers (DPS955) course.
+Microservice for processing fragments (text/images). A part of the course project for Cloud Computing
+for Programmers (DPS955).
 
 ## Author
 
