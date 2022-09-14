@@ -17,6 +17,7 @@
   "author": "Nikita Mezhenskyi",
   "license": "UNLICENSED",
   "devDependencies": {
+    "dotenv": "^16.0.2",
     "eslint": "^8.23.0",
     "nodemon": "^2.0.19"
   },
