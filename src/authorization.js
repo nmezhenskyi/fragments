@@ -4,6 +4,12 @@ const { CognitoJwtVerifier } = require('aws-jwt-verify')
 
 const logger = require('./logger')
 
+if (!(process.env.AWS_COGNITO_POOL_ID && process.env.AWS_COGNITO_CLIENT_ID)) {
+  throw new Error(
+    'missing expected vars: AWS_COGNITO_POOL_ID, AWS_COGNITO_CLIENT_ID'
+  )
+}
+
 const jwtVerifier = CognitoJwtVerifier.create({
   userPoolId: process.env.AWS_COGNITO_POOL_ID,
   clientId: process.env.AWS_COGNITO_CLIENT_ID,
