@@ -7,7 +7,7 @@
     "test:watch": "jest -c jest.config.js --runInBand --watch --",
     "test": "jest -c jest.config.js --runInBand --",
     "coverage": "jest -c jest.config.js --runInBand --coverage",
-    "lint": "eslint --config .eslintrc.js src/**",
+    "lint": "eslint --config .eslintrc.js src/** tests/**",
     "start": "node src/index.js",
     "dev": "LOG_LEVEL=debug nodemon ./src/index.js --watch src",
     "debug": "LOG_LEVEL=debug nodemon --inspect=0.0.0.0:9229 ./src/index.js --watch src"
@@ -22,7 +22,8 @@
     "dotenv": "^16.0.2",
     "eslint": "^8.23.0",
     "jest": "^29.0.3",
-    "nodemon": "^2.0.19"
+    "nodemon": "^2.0.19",
+    "supertest": "^6.2.4"
   },
   "dependencies": {
     "aws-jwt-verify": "^2.1.3",
