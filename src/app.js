@@ -7,7 +7,7 @@ const logger = require('./logger')
 const pino = require('pino-http')({ logger })
 
 const passport = require('passport')
-const authorization = require('./authorization')
+const authorization = require('./authentication')
 
 const app = express()
 
