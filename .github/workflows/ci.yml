@@ -12,7 +12,7 @@ on:
 jobs:
   lint:
     name: ESLint
-    runs-on: ubuntu-latests
+    runs-on: ubuntu-latest
     steps:
       # https://github.com/actions/checkout
       - name: Check out code
