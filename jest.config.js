@@ -1,5 +1,5 @@
 const path = require('path')
-const envFile = path.join(__dirname, 'env.jest')
+const envFile = path.join(__dirname, '.env.jest')
 
 require('dotenv').config({ path: envFile })
 

@@ -3,7 +3,7 @@ const express = require('express')
 const { version, author } = require('../../package.json')
 
 const router = express.Router()
-const { authenticate } = require('../authentication')
+const { authenticate } = require('../authorization')
 
 /**
  * Expose v1 API routes.
