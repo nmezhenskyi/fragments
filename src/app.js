@@ -8,6 +8,7 @@ const pino = require('pino-http')({ logger })
 
 const passport = require('passport')
 const authorization = require('./authorization')
+const { createErrorResponse } = require('./response')
 
 const app = express()
 
@@ -24,18 +25,10 @@ app.use('/', require('./routes'))
 /**
  * Not found handler.
  */
-app.use((_req, res) => {
-  res.status(404).json({
-    status: 'error',
-    error: {
-      message: 'Not found',
-      code: 404,
-    },
-  })
-})
+app.use((_req, res) => res.status(404).json(createErrorResponse(404, 'Not found')))
 
 /**
- * Error handler
+ * Top-level error handler.
  */
 app.use((err, _req, res, _next) => {
   const status = err.status || 500
@@ -45,13 +38,7 @@ app.use((err, _req, res, _next) => {
     logger.error({ err }, 'Error processing request')
   }
 
-  res.status(status).json({
-    status: 'error',
-    error: {
-      message,
-      code: status,
-    },
-  })
+  res.status(status).json(createErrorResponse(status, message))
 })
 
 module.exports = app

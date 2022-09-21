@@ -4,6 +4,7 @@ const { version, author } = require('../../package.json')
 
 const router = express.Router()
 const { authenticate } = require('../authorization')
+const { createSuccessResponse } = require('../response')
 
 /**
  * Expose v1 API routes.
@@ -15,12 +16,12 @@ router.use('/v1', authenticate(), require('./api'))
  */
 router.get('/', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache')
-  res.status(200).json({
-    status: 'ok',
+  const body = createSuccessResponse({
     author,
     githubUrl: 'https://github.com/nmezhenskyi/fragments',
     version,
   })
+  res.status(200).json(body)
 })
 
 module.exports = router
