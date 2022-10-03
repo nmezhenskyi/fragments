@@ -49,7 +49,7 @@ function readFragmentData(ownerId, id) {
  * Get a list of fragments ids/objects for the given user from memory db.
  * @param {string} ownerId
  * @param {string} expand
- * @returns {Promise<any>}
+ * @returns {Promise<Array<any>>}
  */
 async function listFragments(ownerId, expand = false) {
   const fragments = await metadata.query(ownerId)
