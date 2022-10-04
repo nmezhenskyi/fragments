@@ -36,8 +36,8 @@ class Fragment {
 
     this.id = id || randomUUID()
     this.ownerId = ownerId
-    this.created = created || new Date().toUTCString()
-    this.updated = updated || new Date().toUTCString()
+    this.created = created || new Date().toISOString()
+    this.updated = updated || new Date().toISOString()
     this.type = type
     this.size = size
   }
@@ -81,9 +81,7 @@ class Fragment {
    * @returns {Promise<void>}
    */
   async save() {
-    const now = new Date()
-    now.setMilliseconds(now.getMilliseconds() + 1000)
-    this.updated = now.toUTCString()
+    this.updated = new Date().toISOString()
     return writeFragment(this)
   }
 
@@ -104,9 +102,7 @@ class Fragment {
     if (!(data instanceof Buffer)) {
       throw new Error('data must be of type Buffer')
     }
-    const now = new Date()
-    now.setMilliseconds(now.getMilliseconds() + 2000)
-    this.updated = now.toUTCString()
+    this.updated = new Date().toISOString()
     this.size = data.byteLength
     return writeFragmentData(this.ownerId, this.id, data)
   }
