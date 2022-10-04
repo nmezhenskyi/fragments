@@ -1,5 +1,6 @@
 const request = require('supertest')
 const app = require('../../src/app')
+const hash = require('../../src/hash')
 
 describe('POST /v1/fragments', () => {
   test('unauthenticated requests are denied', () =>
@@ -35,7 +36,7 @@ describe('POST /v1/fragments', () => {
     expect(res.body.fragment).not.toBe(undefined)
     expect(res.body.fragment.type).toEqual('text/plain')
     expect(res.body.fragment.size).toEqual('8N5xWFj80a'.length)
-    expect(res.body.fragment.ownerId).toEqual('user1@email.com')
+    expect(res.body.fragment.ownerId).toEqual(hash('user1@email.com'))
     expect(typeof res.body.fragment.id === 'string').toBe(true)
     expect(typeof res.body.fragment.created === 'string').toBe(true)
     expect(typeof res.body.fragment.updated === 'string').toBe(true)
