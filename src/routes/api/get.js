@@ -1,3 +1,4 @@
+const mime = require('mime-types')
 const { createSuccessResponse } = require('../../response')
 const { Fragment } = require('../../model/fragment')
 
@@ -18,9 +19,17 @@ const getFragments = async (req, res, next) => {
  */
 const getFragmentById = async (req, res, next) => {
   try {
-    const fragment = await Fragment.byId(req.user, req.params.id)
+    const [id, ext] = req.params.id.split('.')
+    const fragment = await Fragment.byId(req.user, id)
     const data = await fragment.getData()
-    return res.status(200).send(data)
+
+    // TODO: actual file format conversion
+    let contentType = fragment.type
+    if (Fragment.isSupportedType(mime.lookup(ext))) {
+      contentType = mime.lookup(ext)
+    }
+
+    return res.status(200).set('Content-Type', contentType).send(data)
   } catch (err) {
     return next(err)
   }
