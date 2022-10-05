@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto')
 const contentType = require('content-type')
+const { ApiError } = require('../exceptions')
 
 const {
   readFragment,
@@ -12,7 +13,16 @@ const {
 
 const logger = require('../logger')
 
-const validTypes = [`text/plain`]
+const validTypes = {
+  'text/plain': ['.txt'],
+  // 'text/markdown': ['.md', '.html', '.txt'],
+  // 'text/html': ['.html', '.txt'],
+  // 'application/json': ['.json', '.txt'],
+  // 'image/png': ['.png', '.jpg', '.webp', '.gif'],
+  // 'image/jpeg': ['.png', '.jpg', '.webp', '.gif'],
+  // 'image/webp': ['.png', '.jpg', '.webp', '.gif'],
+  // 'image/gif': ['.png', '.jpg', '.webp', '.gif'],
+}
 
 class Fragment {
   constructor({ id, ownerId, created, updated, type, size = 0 }) {
@@ -61,7 +71,7 @@ class Fragment {
   static async byId(ownerId, id) {
     const fragment = await readFragment(ownerId, id)
     if (!fragment) {
-      throw new Error('Fragment not found')
+      throw ApiError.NotFound(`Fragment ${id} not found`)
     }
     return fragment
   }
@@ -140,7 +150,7 @@ class Fragment {
    */
   static isSupportedType(value) {
     const { type } = contentType.parse(value)
-    return validTypes.includes(type)
+    return validTypes[type] !== undefined
   }
 }
 
