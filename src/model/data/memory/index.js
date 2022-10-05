@@ -1,9 +1,9 @@
 const MemoryDB = require('./memory-db')
 
 /** raw data */
-const data = new MemoryDB()
+let data = new MemoryDB()
 /** fragment metadata */
-const metadata = new MemoryDB()
+let metadata = new MemoryDB()
 
 /**
  * Write a fragment's metadata to memory db.
@@ -69,9 +69,25 @@ function deleteFragment(ownerId, id) {
   return Promise.all([metadata.del(ownerId, id), data.del(ownerId, id)])
 }
 
+/**
+ * Clears all stored data for testing purposes.
+ *
+ * @warning Only use for unit tests.
+ * @returns {Promise<void>}
+ */
+function tearDown() {
+  if (process.env.NODE_ENV !== 'test') {
+    throw new Error('tearDown() can only be used in test environment')
+  }
+  data = new MemoryDB()
+  metadata = new MemoryDB()
+  return Promise.resolve()
+}
+
 module.exports.listFragments = listFragments
 module.exports.writeFragment = writeFragment
 module.exports.readFragment = readFragment
 module.exports.writeFragmentData = writeFragmentData
 module.exports.readFragmentData = readFragmentData
 module.exports.deleteFragment = deleteFragment
+module.exports.tearDown = tearDown
