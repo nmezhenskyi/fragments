@@ -1,0 +1,15 @@
+.vscode
+.github
+.DS_Store
+.git
+.gitignore
+.prettier*
+.eslint*
+jest*
+
+node_modules/
+coverage/
+tests/
+!tests/.htpasswd
+
+.env
