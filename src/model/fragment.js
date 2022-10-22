@@ -67,6 +67,8 @@ class Fragment {
    * @param {string} ownerId users' hashed email
    * @param {string} id fragment's id
    * @returns {Promise<Fragment>} fragment
+   *
+   * @throws Will throw ApiError.NotFound if fragment does not exist.
    */
   static async byId(ownerId, id) {
     const fragment = await readFragment(ownerId, id)
