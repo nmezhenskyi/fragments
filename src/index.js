@@ -12,4 +12,13 @@ process.on('unhandledRejection', (reason, promise) => {
   throw reason
 })
 
-require('./server')
+const server = require('./server')
+
+function closeGracefully(_signal) {
+  server.stop(() => {
+    logger.info('Fragments microservice has been stopped')
+    process.exit()
+  })
+}
+
+process.on('SIGINT', closeGracefully)
