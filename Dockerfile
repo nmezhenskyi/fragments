@@ -8,7 +8,7 @@ LABEL description="Fragments node.js microservice"
 ENV NPM_CONFIG_LOGLEVEL=warn
 ENV NPM_CONFIG_COLOR=false
 
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init=1.2.5-r1
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
 #####################################################################
@@ -34,8 +34,9 @@ ENV PORT=8080
 
 WORKDIR /app
 
-RUN chown -R node:node /app
-RUN chmod 750 /app
+RUN chown -R node:node /app && \
+    chmod 750 /app
+
 USER node
 
 COPY --from=dependencies /app /app
