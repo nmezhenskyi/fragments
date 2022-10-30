@@ -8,7 +8,8 @@ LABEL description="Fragments node.js microservice"
 ENV NPM_CONFIG_LOGLEVEL=warn
 ENV NPM_CONFIG_COLOR=false
 
-RUN apk add --no-cache dumb-init=1.2.5-r1
+RUN apk add --no-cache dumb-init=1.2.5-r1 && \
+    apk add --no-cache curl=7.85.0-r0
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
 #####################################################################
