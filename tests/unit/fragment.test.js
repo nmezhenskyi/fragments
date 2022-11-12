@@ -5,10 +5,10 @@ const wait = async (ms = 10) => new Promise((resolve) => setTimeout(resolve, ms)
 
 const validTypes = [
   `text/plain`,
-  /*
   `text/markdown`,
   `text/html`,
   `application/json`,
+  /*
   `image/png`,
   `image/jpeg`,
   `image/webp`,
@@ -173,6 +173,110 @@ describe('Fragment class', () => {
       })
       expect(fragment.formats).toEqual(['text/plain'])
     })
+
+    test('isConvertableTo() returns true for text/plain to supported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/plain; charset=utf-8',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.txt')).toEqual(true)
+    })
+
+    test('isConvertableTo() returns false for text/plain to unsupported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/plain; charset=utf-8',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.md')).toEqual(false)
+      expect(fragment.isConvertableTo('.html')).toEqual(false)
+      expect(fragment.isConvertableTo('.json')).toEqual(false)
+      expect(fragment.isConvertableTo('.png')).toEqual(false)
+      expect(fragment.isConvertableTo('.jpg')).toEqual(false)
+      expect(fragment.isConvertableTo('.webp')).toEqual(false)
+      expect(fragment.isConvertableTo('.gif')).toEqual(false)
+      expect(fragment.isConvertableTo('abcd')).toEqual(false)
+      expect(fragment.isConvertableTo('')).toEqual(false)
+    })
+
+    test('isConvertableTo() returns true for text/markdown to for supported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/markdown',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.md')).toEqual(true)
+      expect(fragment.isConvertableTo('.html')).toEqual(true)
+      expect(fragment.isConvertableTo('.txt')).toEqual(true)
+    })
+
+    test('isConvertableTo() returns false for text/markdown to for unsupported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/markdown',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.json')).toEqual(false)
+      expect(fragment.isConvertableTo('.png')).toEqual(false)
+      expect(fragment.isConvertableTo('.jpg')).toEqual(false)
+      expect(fragment.isConvertableTo('.webp')).toEqual(false)
+      expect(fragment.isConvertableTo('.gif')).toEqual(false)
+      expect(fragment.isConvertableTo('abcd')).toEqual(false)
+      expect(fragment.isConvertableTo('')).toEqual(false)
+    })
+
+    test('isConvertableTo() returns true for text/html to for supported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/html',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.html')).toEqual(true)
+      expect(fragment.isConvertableTo('.txt')).toEqual(true)
+    })
+
+    test('isConvertableTo() returns false for text/html to for unsupported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/html',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.md')).toEqual(false)
+      expect(fragment.isConvertableTo('.json')).toEqual(false)
+      expect(fragment.isConvertableTo('.png')).toEqual(false)
+      expect(fragment.isConvertableTo('.jpg')).toEqual(false)
+      expect(fragment.isConvertableTo('.webp')).toEqual(false)
+      expect(fragment.isConvertableTo('.gif')).toEqual(false)
+      expect(fragment.isConvertableTo('abcd')).toEqual(false)
+      expect(fragment.isConvertableTo('')).toEqual(false)
+    })
+
+    test('isConvertableTo() returns true for application/json to for supported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'application/json',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.json')).toEqual(true)
+      expect(fragment.isConvertableTo('.txt')).toEqual(true)
+    })
+
+    test('isConvertableTo() returns false for application/json to for unsupported formats', () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'application/json',
+        size: 0,
+      })
+      expect(fragment.isConvertableTo('.md')).toEqual(false)
+      expect(fragment.isConvertableTo('.html')).toEqual(false)
+      expect(fragment.isConvertableTo('.png')).toEqual(false)
+      expect(fragment.isConvertableTo('.jpg')).toEqual(false)
+      expect(fragment.isConvertableTo('.webp')).toEqual(false)
+      expect(fragment.isConvertableTo('.gif')).toEqual(false)
+      expect(fragment.isConvertableTo('abcd')).toEqual(false)
+      expect(fragment.isConvertableTo('')).toEqual(false)
+    })
   })
 
   describe('save(), getData(), setData(), byId(), byUser(), delete()', () => {
@@ -257,6 +361,19 @@ describe('Fragment class', () => {
 
       await Fragment.delete('1234', fragment.id)
       expect(() => Fragment.byId('1234', fragment.id)).rejects.toThrow()
+    })
+  })
+
+  describe('convertTo()', () => {
+    test('convert from text/markdown to .html', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/markdown; charset=utf-8',
+        size: 0,
+      })
+      await fragment.setData(Buffer.from('# Example markdown'))
+      const result = await fragment.convertTo('.html')
+      expect(result.toString()).toEqual('<h1>Example markdown</h1>\n')
     })
   })
 })
