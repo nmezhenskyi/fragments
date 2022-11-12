@@ -30,14 +30,14 @@ const getFragments = async (req, res, next) => {
 const getFragmentById = async (req, res, next) => {
   try {
     const [id, ext] = req.params.id.split('.')
-    const fragment = await Fragment.byId(req.user, id)
-    const data = await fragment.getData()
 
-    // TODO: actual file format conversion
-    let contentType = fragment.type
-    if (Fragment.isSupportedType(mime.lookup(ext))) {
-      contentType = mime.lookup(ext)
+    if (ext && !Fragment.isSupportedType(mime.lookup(ext))) {
+      return next(ApiError.UnsupportedMediaType())
     }
+
+    const fragment = await Fragment.byId(req.user, id)
+    const contentType = ext ? mime.lookup(ext) : fragment.type
+    const data = ext ? await fragment.convertTo(`.${ext}`) : await fragment.getData()
 
     return res.status(200).set('Content-Type', contentType).send(data)
   } catch (err) {
