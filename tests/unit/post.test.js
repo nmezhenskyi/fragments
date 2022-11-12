@@ -53,4 +53,33 @@ describe('POST /v1/fragments', () => {
       `${process.env.API_URL}/v1/fragments/${res.body.fragment.id}`
     )
   })
+
+  test('support text/html content type', async () => {
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/html')
+      .send(
+        '<!DOCTYPE html><html><head><title>Example</title></head><body><h1>Test</h1></body></html>'
+      )
+    expect(res.statusCode).toBe(201)
+  })
+
+  test('support text/markdown content type', async () => {
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/markdown')
+      .send('# Markdown Document\n## Test')
+    expect(res.statusCode).toBe(201)
+  })
+
+  test('support application/json content type', async () => {
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'application/json')
+      .send('{ key: "some_value" }')
+    expect(res.statusCode).toBe(201)
+  })
 })
