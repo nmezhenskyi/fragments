@@ -170,6 +170,111 @@ describe('GET /v1/fragments/:id', () => {
     expect(res.headers['content-type']).toMatch(/^text\/plain/)
     expect(res.body.toString()).toEqual(payload)
   })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/html support', async () => {
+    const payload =
+      '<!DOCTYPE html><html><head><title>Example</title></head><body><h1>Test</h1></body></html>'
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/html')
+      .send(payload)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/html/)
+    expect(res.body.toString()).toEqual(payload)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/markdown support', async () => {
+    const payload = '# Markdown Document\n## Test'
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/markdown')
+      .send(payload)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/markdown/)
+    expect(res.body.toString()).toEqual(payload)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('application/json support', async () => {
+    const payload = '{ key: "some_value" }'
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'application/json')
+      .send(payload)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^application\/json/)
+    expect(res.body.toString()).toEqual(payload)
+  })
+})
+
+describe('GET /v1/fragments/:id.ext', () => {
+  beforeEach(async () => tearDown())
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('unsupported conversion fails', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/plain')
+      .send('Some plain text')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.html`)
+      .auth('user1@email.com', 'password1')
+    expect(res.statusCode).toEqual(415)
+    expect(res.body).toMatchObject({
+      status: 'error',
+      error: { code: 415, message: 'Unsupported Media Type' },
+    })
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/markdown to .html', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/markdown')
+      .send('# Markdown Document\n## Test')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.html`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/html/)
+    expect(res.body.toString()).toEqual(
+      '<h1>Markdown Document</h1>\n<h2>Test</h2>\n'
+    )
+  })
 })
 
 describe('GET /v1/fragments/:id/info', () => {
