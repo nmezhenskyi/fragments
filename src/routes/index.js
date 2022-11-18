@@ -1,6 +1,7 @@
 const express = require('express')
 
 const { version, author } = require('../../package.json')
+const { hostname } = require('os')
 
 const router = express.Router()
 const { authenticate } = require('../authorization')
@@ -20,6 +21,7 @@ router.get('/', (_req, res) => {
     author,
     githubUrl: 'https://github.com/nmezhenskyi/fragments',
     version,
+    hostname: hostname(),
   })
   res.status(200).json(body)
 })
