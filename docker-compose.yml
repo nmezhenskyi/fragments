@@ -1,0 +1,31 @@
+services:
+  fragments:
+    init: true
+    build: .
+    environment:
+      - API_URL=http://localhost:8080
+      - HTPASSWD_FILE=tests/.htpasswd
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - AWS_REGION=us-east-1
+      # NOTE: using Docker's internal network to the localstack & dynamodb containers
+      - AWS_S3_ENDPOINT_URL=http://localstack:4566
+      - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
+      # This S3 bucket and DynamoDB table need to get created first, see local-aws-setup.sh
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
+      - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
+    ports:
+      - '8080:8080'
+
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    ports:
+      - '8000:8000'
+    command: ['-jar', 'DynamoDBLocal.jar', '-inMemory']
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - '4566:4566'
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=us-east-1
