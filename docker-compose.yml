@@ -7,10 +7,8 @@ services:
       - HTPASSWD_FILE=tests/.htpasswd
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - AWS_REGION=us-east-1
-      # NOTE: using Docker's internal network to the localstack & dynamodb containers
       - AWS_S3_ENDPOINT_URL=http://localstack:4566
       - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
-      # This S3 bucket and DynamoDB table need to get created first, see local-aws-setup.sh
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-fragments}
       - AWS_DYNAMODB_TABLE_NAME=${AWS_DYNAMODB_TABLE_NAME:-fragments}
     ports:
