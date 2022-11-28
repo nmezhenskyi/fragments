@@ -25,20 +25,7 @@
       "command": [],
       "linuxParameters": null,
       "cpu": 256,
-      "environment": [
-        {
-          "name": "API_URL",
-          "value": "http://ec2co-ecsel-7vmqegbxepeu-1195010009.us-east-1.elb.amazonaws.com:8080"
-        },
-        {
-          "name": "AWS_REGION",
-          "value": "us-east-1"
-        },
-        {
-          "name": "PORT",
-          "value": "8080"
-        }
-      ],
+      "environment": [],
       "resourceRequirements": null,
       "ulimits": null,
       "dnsServers": null,
