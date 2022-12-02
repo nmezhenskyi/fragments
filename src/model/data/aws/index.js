@@ -1,32 +1,64 @@
-const MemoryDB = require('../memory/memory-db')
 const s3Client = require('./s3Client')
 const {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
 } = require('@aws-sdk/client-s3')
-const logger = require('../../../logger')
 
-/** fragment metadata */
-let metadata = new MemoryDB() // TODO: switch to DynamoDB
+const ddbDocClient = require('./ddbDocClient')
+const {
+  PutCommand,
+  GetCommand,
+  QueryCommand,
+  DeleteCommand,
+} = require('@aws-sdk/lib-dynamodb')
+
+const logger = require('../../../logger')
 
 /**
  * Write a fragment's metadata to memory db.
+ *
  * @param {object} fragment
- * @returns {Promise<void>}
+ * @return {Promise<PutCommandOutput>}
  */
 function writeFragment(fragment) {
-  return metadata.put(fragment.ownerId, fragment.id, fragment)
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    Item: fragment,
+  }
+
+  const command = new PutCommand(params)
+
+  try {
+    return ddbDocClient.send(command)
+  } catch (err) {
+    logger.warn({ err, params, fragment }, 'error writing fragment to DynamoDB')
+    throw err
+  }
 }
 
 /**
  * Read a fragment's metadata from memory db.
+ *
  * @param {string} ownerId
  * @param {string} id
- * @returns {Promise<any>}
+ * @returns {Promise<Record<string, any> | undefined>}
  */
-function readFragment(ownerId, id) {
-  return metadata.get(ownerId, id)
+async function readFragment(ownerId, id) {
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    Key: { ownerId, id },
+  }
+
+  const command = new GetCommand(params)
+
+  try {
+    const data = await ddbDocClient.send(command)
+    return data?.Item
+  } catch (err) {
+    logger.warn({ err, params }, 'error reading fragment from DynamoDB')
+    throw err
+  }
 }
 
 /**
@@ -104,6 +136,7 @@ async function deleteFragmentData(ownerId, id) {
   }
 
   const command = new DeleteObjectCommand(params)
+
   try {
     await s3Client.send(command)
   } catch (err) {
@@ -121,35 +154,55 @@ async function deleteFragmentData(ownerId, id) {
  * @returns {Promise<void>}
  */
 function deleteFragment(ownerId, id) {
-  return Promise.all([metadata.del(ownerId, id), deleteFragmentData(ownerId, id)])
+  const deleteMetadata = async (ownerId, id) => {
+    const params = {
+      TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+      Key: { ownerId, id },
+    }
+
+    const command = new DeleteCommand(params)
+
+    try {
+      await ddbDocClient.send(command)
+    } catch (err) {
+      logger.warn({ err, params }, 'failed to delete fragment metadata')
+      throw err
+    }
+  }
+
+  return Promise.all([deleteMetadata(ownerId, id), deleteFragmentData(ownerId, id)])
 }
 
 /**
  * Get a list of fragments ids/objects for the given user from memory db.
  * @param {string} ownerId
  * @param {string} expand
- * @returns {Promise<Array<any>>}
+ * @returns {Promise<Array<Fragment>|Array<string>|undefined>}
  */
 async function listFragments(ownerId, expand = false) {
-  const fragments = await metadata.query(ownerId)
-  if (expand || !fragments) {
-    return fragments
+  const params = {
+    TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
+    KeyConditionExpression: 'ownerId = :ownerId',
+    ExpressionAttributeValues: {
+      ':ownerId': ownerId,
+    },
   }
-  return fragments.map((fragment) => fragment.id)
-}
+  if (!expand) {
+    params.ProjectionExpression = 'id'
+  }
 
-/**
- * Clears all stored data for testing purposes.
- *
- * @warning Only use for unit tests.
- * @returns {Promise<void>}
- */
-function tearDown() {
-  if (process.env.NODE_ENV !== 'test') {
-    throw new Error('tearDown() can only be used in test environment')
+  const command = new QueryCommand(params)
+
+  try {
+    const data = await command.send(params)
+    return !expand ? data?.Items.map((item) => item.id) : data?.Items
+  } catch (err) {
+    logger.warn(
+      { err, params },
+      'error getting all fragments for the user from DynamoDB'
+    )
+    throw err
   }
-  metadata = new MemoryDB()
-  return Promise.resolve()
 }
 
 module.exports.listFragments = listFragments
@@ -158,4 +211,3 @@ module.exports.readFragment = readFragment
 module.exports.writeFragmentData = writeFragmentData
 module.exports.readFragmentData = readFragmentData
 module.exports.deleteFragment = deleteFragment
-module.exports.tearDown = tearDown
