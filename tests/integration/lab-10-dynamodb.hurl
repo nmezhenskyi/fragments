@@ -66,8 +66,8 @@ Content-Type: application/json; charset=utf-8
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.fragments" isCollection
-jsonpath "$.fragments[*]" includes "{{fragment1_id}}"
-jsonpath "$.fragments[*]" includes "{{fragment2_id}}"
+jsonpath "$.fragments" includes "{{fragment1_id}}"
+jsonpath "$.fragments" includes "{{fragment2_id}}"
 
 # 8. DELETE the first fragment
 DELETE {{fragment1_url}}
@@ -101,5 +101,5 @@ Content-Type: application/json; charset=utf-8
 [Asserts]
 jsonpath "$.status" == "ok"
 jsonpath "$.fragments" isCollection
-jsonpath "$.fragments[*]" not includes "{{fragment1_id}}"
-jsonpath "$.fragments[*]" includes "{{fragment2_id}}"
+jsonpath "$.fragments" not includes "{{fragment1_id}}"
+jsonpath "$.fragments" includes "{{fragment2_id}}"
