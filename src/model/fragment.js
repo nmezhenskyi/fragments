@@ -77,7 +77,7 @@ class Fragment {
     if (!fragment) {
       throw ApiError.NotFound(`Fragment ${id} not found`)
     }
-    return fragment
+    return new Fragment(fragment)
   }
 
   /**

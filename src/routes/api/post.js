@@ -22,8 +22,8 @@ const postFragment = async (req, res, next) => {
       type: req.get('Content-Type'),
     })
 
-    await fragment.save()
     await fragment.setData(req.body)
+    await fragment.save()
 
     res.set('Location', `${process.env.API_URL}/v1/fragments/${fragment.id}`)
     return res.status(201).json(createSuccessResponse({ fragment }))
