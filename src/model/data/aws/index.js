@@ -194,7 +194,7 @@ async function listFragments(ownerId, expand = false) {
   const command = new QueryCommand(params)
 
   try {
-    const data = await command.send(params)
+    const data = await ddbDocClient.send(command)
     return !expand ? data?.Items.map((item) => item.id) : data?.Items
   } catch (err) {
     logger.warn(
