@@ -13,6 +13,7 @@ const rawBody = () =>
 router.get('/fragments', require('./get').getFragments)
 router.post('/fragments', rawBody(), require('./post').postFragment)
 router.get('/fragments/:id', require('./get').getFragmentById)
+router.put('/fragments/:id', rawBody(), require('./put').putFragment)
 router.delete('/fragments/:id', require('./delete').deleteFragment)
 router.get('/fragments/:id/info', require('./get').getFragmentMetadataById)
 
