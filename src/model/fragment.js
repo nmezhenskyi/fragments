@@ -2,6 +2,7 @@ const { randomUUID } = require('crypto')
 const mime = require('mime-types')
 const contentType = require('content-type')
 const md = require('markdown-it')()
+const sharp = require('sharp')
 const { ApiError } = require('../exceptions')
 
 const {
@@ -20,10 +21,10 @@ const validTypes = {
   'text/markdown': ['.md', '.html', '.txt'],
   'text/html': ['.html', '.txt'],
   'application/json': ['.json', '.txt'],
-  // 'image/png': ['.png', '.jpg', '.webp', '.gif'],
-  // 'image/jpeg': ['.png', '.jpg', '.webp', '.gif'],
-  // 'image/webp': ['.png', '.jpg', '.webp', '.gif'],
-  // 'image/gif': ['.png', '.jpg', '.webp', '.gif'],
+  'image/png': ['.png', '.jpg', '.webp', '.gif'],
+  'image/jpeg': ['.png', '.jpg', '.webp', '.gif'],
+  'image/webp': ['.png', '.jpg', '.webp', '.gif'],
+  'image/gif': ['.png', '.jpg', '.webp', '.gif'],
 }
 
 class Fragment {
@@ -145,9 +146,25 @@ class Fragment {
     if (this.mimeType === mime.contentType(extension)) {
       return this.getData()
     }
+    if (
+      (this.isText || this.mimeType === 'application/json') &&
+      extension === '.txt'
+    ) {
+      return this.getData()
+    }
     if (this.mimeType === 'text/markdown' && extension === '.html') {
       const data = await this.getData()
       return Buffer.from(md.render(data.toString()))
+    }
+    if (this.isImage) {
+      try {
+        const data = await this.getData()
+        const res = await sharp(data).toFormat(extension)
+        return res.toBuffer()
+      } catch (err) {
+        logger.debug({ err }, `failed to convert fragment to ${extension}`)
+        throw err
+      }
     }
     return this.getData()
   }
@@ -168,6 +185,14 @@ class Fragment {
    */
   get isText() {
     return /text\/{1,}/gi.test(this.mimeType)
+  }
+
+  /**
+   * Returns true if this fragment is a image/* mime type.
+   * @returns {boolean} true if fragment's type is image/*
+   */
+  get isImage() {
+    return /image\/{1,}/gi.test(this.mimeType)
   }
 
   /**
