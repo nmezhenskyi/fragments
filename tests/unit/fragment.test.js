@@ -136,7 +136,7 @@ describe('Fragment class', () => {
     })
   })
 
-  describe('mimeType, isText', () => {
+  describe('mimeType, isText, isImage', () => {
     test('mimeType returns the mime type without charset', () => {
       const fragment = new Fragment({
         ownerId: '1234',
@@ -158,9 +158,24 @@ describe('Fragment class', () => {
       const fragment = new Fragment({
         ownerId: '1234',
         type: 'text/plain; charset=utf-8',
-        size: 0,
       })
       expect(fragment.isText).toBe(true)
+      fragment.type = 'image/png'
+      expect(fragment.isText).toBe(false)
+    })
+
+    test('isImage return expected results', () => {
+      // Text fragment
+      const fragment = new Fragment({ ownerId: '1234', type: 'image/png' })
+      expect(fragment.isImage).toBe(true)
+      fragment.type = 'image/jpeg'
+      expect(fragment.isImage).toBe(true)
+      fragment.type = 'image/webp'
+      expect(fragment.isImage).toBe(true)
+      fragment.type = 'image/gif'
+      expect(fragment.isImage).toBe(true)
+      fragment.type = 'application/json'
+      expect(fragment.isImage).toBe(false)
     })
   })
 
