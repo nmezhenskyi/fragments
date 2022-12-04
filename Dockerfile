@@ -35,12 +35,15 @@ ENV PORT=8080
 
 WORKDIR /app
 
+COPY --from=dependencies /app /app
+
+RUN npm uninstall sharp && \
+    npm install --arch=x64 --platform=linux --libc=musl sharp@0.30.7
+
 RUN chown -R node:node /app && \
     chmod 750 /app
 
 USER node
-
-COPY --from=dependencies /app /app
 
 COPY ./tests/.htpasswd ./tests/.htpasswd
 
@@ -52,5 +55,3 @@ HEALTHCHECK --interval=1m --timeout=30s --start-period=10s --retries=3 \
   CMD curl -f localhost:8080 || exit 1
 
 CMD ["node", "src/index.js"]
-
-#####################################################################
