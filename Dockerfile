@@ -38,9 +38,8 @@ WORKDIR /app
 COPY --from=dependencies /app /app
 
 RUN npm uninstall sharp && \
-    npm install --arch=x64 --platform=linux --libc=musl sharp@0.30.7
-
-RUN chown -R node:node /app && \
+    npm install --arch=x64 --platform=linux --libc=musl sharp@0.30.7 && \
+    chown -R node:node /app && \
     chmod 750 /app
 
 USER node
