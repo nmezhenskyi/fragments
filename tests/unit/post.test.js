@@ -1,4 +1,5 @@
 const request = require('supertest')
+const fs = require('fs').promises
 const app = require('../../src/app')
 const hash = require('../../src/hash')
 
@@ -81,5 +82,53 @@ describe('POST /v1/fragments', () => {
       .set('Content-Type', 'application/json')
       .send('{ key: "some_value" }')
     expect(res.statusCode).toBe(201)
+  })
+
+  test('support image/png content type', async () => {
+    const data = await fs.readFile('./tests/assets/test.png')
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/png')
+      .send(data)
+    expect(res.statusCode).toBe(201)
+    expect(res.body.status).toEqual('ok')
+    expect(res.body?.fragment?.type).toEqual('image/png')
+  })
+
+  test('support image/jpeg content type', async () => {
+    const data = await fs.readFile('./tests/assets/test.jpg')
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/jpeg')
+      .send(data)
+    expect(res.statusCode).toBe(201)
+    expect(res.body.status).toEqual('ok')
+    expect(res.body?.fragment?.type).toEqual('image/jpeg')
+  })
+
+  test('support image/webp content type', async () => {
+    const data = await fs.readFile('./tests/assets/test.webp')
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/webp')
+      .send(data)
+    expect(res.statusCode).toBe(201)
+    expect(res.body.status).toEqual('ok')
+    expect(res.body?.fragment?.type).toEqual('image/webp')
+  })
+
+  test('support image/gif content type', async () => {
+    const data = await fs.readFile('./tests/assets/test.gif')
+    const res = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/gif')
+      .send(data)
+    expect(res.statusCode).toBe(201)
+    expect(res.body.status).toEqual('ok')
+    expect(res.body?.fragment?.type).toEqual('image/gif')
   })
 })
