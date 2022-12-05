@@ -1,3 +1,4 @@
+const fs = require('fs').promises
 const request = require('supertest')
 const app = require('../../src/app')
 const { tearDown } = require('../../src/model/data/index')
@@ -258,6 +259,44 @@ describe('GET /v1/fragments/:id.ext', () => {
   /**
    * Depends on POST /v1/fragments.
    */
+  test('text/plain to .txt', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/plain')
+      .send('Some text value')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.txt`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/plain/)
+    expect(res.body.toString()).toEqual('Some text value')
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/markdown to .md', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/markdown')
+      .send('# Markdown Document\n## Test')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.md`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/markdown/)
+    expect(res.body.toString()).toEqual('# Markdown Document\n## Test')
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
   test('text/markdown to .html', async () => {
     const postRes = await request(app)
       .post('/v1/fragments')
@@ -274,6 +313,405 @@ describe('GET /v1/fragments/:id.ext', () => {
     expect(res.body.toString()).toEqual(
       '<h1>Markdown Document</h1>\n<h2>Test</h2>\n'
     )
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/markdown to .txt', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/markdown')
+      .send('# Markdown Document\n## Test')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.txt`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/plain/)
+    expect(res.body.toString()).toEqual('# Markdown Document\n## Test')
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/html to .html', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/html')
+      .send('<h1>Some html</h1>')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.html`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/html/)
+    expect(res.body.toString()).toEqual('<h1>Some html</h1>')
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('text/html to .txt', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'text/html')
+      .send('<h1>Some html</h1>')
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.txt`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/plain/)
+    expect(res.body.toString()).toEqual('<h1>Some html</h1>')
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('application/json to .json', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'application/json')
+      .send(`{ "key": "value" }`)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.json`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^application\/json/)
+    expect(res.body.toString()).toEqual(`{ "key": "value" }`)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('application/json to .txt', async () => {
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'application/json')
+      .send(`{ "key": "value" }`)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.txt`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^text\/plain/)
+    expect(res.body.toString()).toEqual(`{ "key": "value" }`)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/png to .png', async () => {
+    const data = await fs.readFile('./tests/assets/test.png')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/png')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.png`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/png/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/png to .jpg', async () => {
+    const data = await fs.readFile('./tests/assets/test.png')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/png')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.jpg`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/jpeg/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/png to .webp', async () => {
+    const data = await fs.readFile('./tests/assets/test.png')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/png')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.webp`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/webp/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/png to .gif', async () => {
+    const data = await fs.readFile('./tests/assets/test.png')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/png')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.gif`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/gif/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/jpeg to .png', async () => {
+    const data = await fs.readFile('./tests/assets/test.jpg')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/jpeg')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.png`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/png/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/jpeg to .jpg', async () => {
+    const data = await fs.readFile('./tests/assets/test.jpg')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/jpeg')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.jpg`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/jpeg/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/jpeg to .webp', async () => {
+    const data = await fs.readFile('./tests/assets/test.jpg')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/jpeg')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.webp`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/webp/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/jpeg to .gif', async () => {
+    const data = await fs.readFile('./tests/assets/test.jpg')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/jpeg')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.gif`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/gif/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/webp to .png', async () => {
+    const data = await fs.readFile('./tests/assets/test.webp')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/webp')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.png`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/png/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/webp to .jpg', async () => {
+    const data = await fs.readFile('./tests/assets/test.webp')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/webp')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.jpg`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/jpeg/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/webp to .webp', async () => {
+    const data = await fs.readFile('./tests/assets/test.webp')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/webp')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.webp`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/webp/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/webp to .gif', async () => {
+    const data = await fs.readFile('./tests/assets/test.webp')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/webp')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.gif`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/gif/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/gif to .png', async () => {
+    const data = await fs.readFile('./tests/assets/test.gif')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/gif')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.png`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/png/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/gif to .jpg', async () => {
+    const data = await fs.readFile('./tests/assets/test.gif')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/gif')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.jpg`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/jpeg/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/gif to .webp', async () => {
+    const data = await fs.readFile('./tests/assets/test.gif')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/gif')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.webp`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/webp/)
+  })
+
+  /**
+   * Depends on POST /v1/fragments.
+   */
+  test('image/gif to .gif', async () => {
+    const data = await fs.readFile('./tests/assets/test.gif')
+    const postRes = await request(app)
+      .post('/v1/fragments')
+      .auth('user1@email.com', 'password1')
+      .set('Content-Type', 'image/gif')
+      .send(data)
+    const res = await request(app)
+      .get(`/v1/fragments/${postRes.body.fragment?.id}.gif`)
+      .auth('user1@email.com', 'password1')
+      .buffer()
+      .parse(binaryParser)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['content-type']).toMatch(/^image\/gif/)
   })
 })
 
