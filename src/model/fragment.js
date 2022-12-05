@@ -159,7 +159,7 @@ class Fragment {
     if (this.isImage) {
       try {
         const data = await this.getData()
-        const res = await sharp(data).toFormat(extension)
+        const res = await sharp(data).toFormat(extension.replace('.', ''))
         return res.toBuffer()
       } catch (err) {
         logger.debug({ err }, `failed to convert fragment to ${extension}`)
