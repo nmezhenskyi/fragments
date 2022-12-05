@@ -1,3 +1,4 @@
+const fs = require('fs').promises
 const { Fragment } = require('../../src/model/fragment')
 
 /** Wait for a certain number of ms. Returns a Promise. */
@@ -8,12 +9,10 @@ const validTypes = [
   `text/markdown`,
   `text/html`,
   `application/json`,
-  /*
   `image/png`,
   `image/jpeg`,
   `image/webp`,
   `image/gif`,
-  */
 ]
 
 describe('Fragment class', () => {
@@ -380,15 +379,95 @@ describe('Fragment class', () => {
   })
 
   describe('convertTo()', () => {
+    test('unsupported conversion throws ApiError.UnsupportedMediaType', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/plain; charset=utf-8',
+      })
+      await fragment.setData(Buffer.from('Some text value'))
+      await expect(fragment.convertTo('.json')).rejects.toThrow(
+        'Unsupported Media Type'
+      )
+    })
+
+    test('convert from text/plain to .txt', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/plain; charset=utf-8',
+      })
+      await fragment.setData(Buffer.from('Some text value'))
+      const result = await fragment.convertTo('.txt')
+      expect(result.toString()).toEqual('Some text value')
+    })
+
+    test('convert from text/markdown to .txt', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/markdown; charset=utf-8',
+      })
+      await fragment.setData(Buffer.from('# Example markdown'))
+      const result = await fragment.convertTo('.txt')
+      expect(result.toString()).toEqual('# Example markdown')
+    })
+
     test('convert from text/markdown to .html', async () => {
       const fragment = new Fragment({
         ownerId: '1234',
         type: 'text/markdown; charset=utf-8',
-        size: 0,
       })
       await fragment.setData(Buffer.from('# Example markdown'))
       const result = await fragment.convertTo('.html')
       expect(result.toString()).toEqual('<h1>Example markdown</h1>\n')
+    })
+
+    test('convert from text/html to .txt', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'text/html',
+      })
+      await fragment.setData(Buffer.from('<h1>Some html</h1>'))
+      const result = await fragment.convertTo('.txt')
+      expect(result.toString()).toEqual('<h1>Some html</h1>')
+    })
+
+    test('convert from application/json to .txt', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'application/json',
+      })
+      await fragment.setData(Buffer.from(`{ "key": "value" }`))
+      const result = await fragment.convertTo('.txt')
+      expect(result.toString()).toEqual(`{ "key": "value" }`)
+    })
+
+    test('convert from image/png to .jpg', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'image/png',
+      })
+      await fragment.setData(await fs.readFile('./tests/assets/test.png'))
+      const result = await fragment.convertTo('.jpg')
+      expect(result.byteLength).toBeGreaterThan(0)
+    })
+
+    test('convert from image/png to .webp', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'image/png',
+      })
+      await fragment.setData(await fs.readFile('./tests/assets/test.png'))
+      const result = await fragment.convertTo('.jpg')
+      expect(result.byteLength).toBeGreaterThan(0)
+    })
+
+    test('convert from image/png to .gif', async () => {
+      const fragment = new Fragment({
+        ownerId: '1234',
+        type: 'image/png',
+      })
+      await fragment.setData(await fs.readFile('./tests/assets/test.png'))
+      const result = await fragment.convertTo('.jpg')
+      expect(result.byteLength).toBeGreaterThan(0)
     })
   })
 })
